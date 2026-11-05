@@ -35,7 +35,7 @@ Bestellt als ESP32-2432S028R (Listing/Datenblatt beschrieben die 1-USB-Originalv
 
 Wer bei AliExpress, Amazon & Co. einfach das erstbeste «ESP32 Display 2.8 inch» bestellt, kann Pech haben. Die grössten Stolpersteine:
 
-### 1. Gleicher Look, andere Hardware – die Varianten-Falle
+### 1. Gleiche Look, andere Hardware – die Varianten-Falle
 
 | Variante | Erkennungsmerkmal | Unterschied |
 |---|---|---|
@@ -132,6 +132,8 @@ Die komplette Hersteller-Ablage (JCZN) liegt im Google Drive im Ordner **CYD_Han
 
 - **[arduino/User_Setup.h](arduino/User_Setup.h)** – **lauffähig getestete** TFT_eSPI-Konfiguration (05.11.2026): ILI9341_DRIVER, TFT_RGB_ORDER TFT_BGR, keine Inversion, TFT_RST −1, Pins MISO 12 / MOSI 13 / SCLK 14 / CS 15 / DC 2 / BL 21, TOUCH_CS 33, 30 MHz. Ersetzt die Datei gleichen Namens im TFT_eSPI-Bibliotheksordner (macOS: ~/Dokumente/Arduino/libraries/TFT_eSPI/).
 - **[arduino/CYD_DisplayTest/CYD_DisplayTest.ino](arduino/CYD_DisplayTest/CYD_DisplayTest.ino)** – bestandener Farbtreue-Test: sechs Farbstreifen + Text; unten blinkt die rote Board-LED (GPIO 4, aktiv LOW).
+- **[arduino/CYD_TouchTest/CYD_TouchTest.ino](arduino/CYD_TouchTest/CYD_TouchTest.ino)** – bestandener Touch-Test (05.11.2026): Mal-Modus mit Farbleiste, Statusanzeige mit RAW-Werten und geführte 4-Punkte-Kalibrierung (XPT2046 am eigenen SPI-Bus).
+- **[SKETCHE.md](SKETCHE.md)** – Anleitung zu allen Versuchs-Sketches: Funktion, Installation, Bibliotheken und Troubleshooting.
 
 ---
 
@@ -152,5 +154,5 @@ Die komplette Hersteller-Ablage (JCZN) liegt im Google Drive im Ordner **CYD_Han
 - [x] Board erhalten, Varianten-Check → **2-USB-Variante (JCZN), ILI9341-Panel** (05.11.2026)
 - [x] Hersteller-Demo-Paket gesichtet, Doku-Widersprüche identifiziert (05.11.2026)
 - [x] Arduino-IDE eingerichtet, User_Setup.h gefunden und getestet → **Display-Test bestanden: 6 Farbstreifen + Text** (05.11.2026)
-- [ ] Touch-Test und -Kalibrierung (XPT2046_Touchscreen-Bibliothek, eigene SPI-Pins SCK 25 / MOSI 32 / MISO 39 / CS 33 / IRQ 36)
+- [x] Touch-Test und -Kalibrierung → **bestanden (05.11.2026)**: CYD_TouchTest mit Mal-Modus, Farbleiste und geführter 4-Punkte-Kalibrierung (XPT2046_Touchscreen, eigene SPI-Pins SCK 25 / MOSI 32 / MISO 39 / CS 33 / IRQ 36)
 - [ ] Konkrete Projekte: Statusdisplay (z. B. MeshCore-Station), Sensor-Dashboard (INA226), Touch-Bedienpanel
