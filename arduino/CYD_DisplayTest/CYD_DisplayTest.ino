@@ -1,7 +1,7 @@
 /*
- *  CYD Display-Test — ESP32-2432S028R, 2-USB-Variante (ST7789)
- *  Prüft die Farbtreue nach der Umstellung der User_Setup.h:
- *  sechs Farbstreifen, Text — und unten blinkt die rote Board-LED (GPIO 4, aktiv LOW).
+ *  CYD Display-Test — ESP32-2432S028R, 2-USB-Variante JCZN (ILI9341-Panel)
+ *  Bestandener Farbtreue-Test (05.11.2026): sechs Farbstreifen + Text,
+ *  unten blinkt die rote Board-LED (GPIO 4, aktiv LOW).
  *  Autor: Paul Simmen mit Vibe (GLM-5-latest-short), 05.11.2026
  */
 
@@ -30,7 +30,7 @@ void setup() {
   tft.setCursor(10, 250);
   tft.println("CYD Display-Test");
   tft.setCursor(10, 275);
-  tft.println("ST7789 2USB OK");
+  tft.println("ILI9341 2USB OK");
 
   Serial.println("Display-Test gezeichnet.");
 }
