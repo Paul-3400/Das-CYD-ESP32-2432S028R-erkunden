@@ -14,6 +14,24 @@ Zentrale Anlaufstelle der Community ist das GitHub-Repo [witnessmenow/ESP32-Chea
 
 ---
 
+## Live-Beispiel: Varianten-Check unseres Boards (05.11.2026)
+
+Genau die oben beschriebene Falle ist beim eigenen Kauf passiert – ein reales Beispiel, warum der Check wichtig ist:
+
+**Bestellt** (AliExpress, Listing = Originalversion): ESP32-2432S028R mit ILI9341, 1× Micro-USB – so beschrieben es Listing und Datenblatt.
+
+**Geliefert:** die **2-USB-Variante (CYD2USB)** mit **ST7789-Controller**. Der Varianten-Check an der Hardware:
+
+| Prüfpunkt | Ergebnis |
+|---|---|
+| USB-Buchsen | **2** → CYD2USB-Variante, nicht die 1-USB-Originalversion |
+| Werks-Demo | läuft (WLAN-Abfrage, Hinweis auf fehlende SD-Card, Menüs Controls/Visuals/Selectors) → Board funktionsfähig |
+| Beilagen | USB-Kabel, Touch-Pen, 4-Pin-Anschlusskabel, Acrylgehäuse – vollständig |
+
+**Konsequenz:** Kein Grund zur Reklamation – die 2-USB-Variante ist genauso brauchbar. Pinout und Touch (XPT2046, resistiv) sind identisch; nur die Display-Konfiguration weicht ab (siehe unten). Beim Flashen: Wenn der Computer das Board nicht erkennt, den jeweils anderen USB-Port probieren.
+
+---
+
 ## Fallstricke beim «Kauf ins Blaue»
 
 Wer bei AliExpress, Amazon & Co. einfach das erstbeste «ESP32 Display 2.8 inch» bestellt, kann Pech haben. Die grössten Stolpersteine:
@@ -25,11 +43,11 @@ Unter der Bezeichnung «CYD» werden mehrere, **nicht kompatible** Boards verkau
 | Variante | Erkennungsmerkmal | Unterschied |
 |---|---|---|
 | **ESP32-2432S028R (1× USB)** | Ein Micro-USB-Anschluss | Originalversion: ILI9341, Standard-Pinout – die meisten Tutorials meinen dieses Board |
-| **CYD2USB (2× USB)** | Zwei USB-Buchsen | Anderer Display-Controller (ST7789), **Farben vertauscht**, andere Konfiguration nötig |
+| **CYD2USB (2× USB)** | Zwei USB-Buchsen | Anderer Display-Controller (ST7789), **Farben vertauscht/invertiert**, andere Konfiguration nötig |
 | Kapazitiver Touch | Angaben wie «CST816» im Listing | Anderer Touch-Chip (I2C statt XPT2046/SPI) – andere Bibliothek nötig |
 | Andere Grössen/Chips | 2,4″, 3,5″, ESP32-S3 … | Abweichende Pinouts und Treiber |
 
-**Wichtig:** Unter derselben Modellnummer werden teils **zwei Revisionen** ausgeliefert. Das Listing-Foto genau ansehen – die USB-Anzahl ist das schnellste Unterscheidungsmerkmal.
+**Wichtig:** Unter derselben Modellnummer werden teils **zwei Revisionen** ausgeliefert – wie unser Live-Beispiel oben zeigt. Das Listing-Foto genau ansehen – die USB-Anzahl ist das schnellste Unterscheidungsmerkmal.
 
 ### 2. Irreführende Listings
 
@@ -42,7 +60,7 @@ Unter der Bezeichnung «CYD» werden mehrere, **nicht kompatible** Boards verkau
 
 - [ ] Modellnummer **ESP32-2432S028R** explizit im Listing
 - [ ] Treiberchip **ILI9341** angegeben
-- [ ] **Ein** USB-Anschluss auf den Fotos (nicht zwei)
+- [ ] **Ein** USB-Anschluss auf den Fotos (nicht zwei) – sonst 2-USB-Variante
 - [ ] Touch-Art: resistiv (Standard) oder kapazitiv (andere Software!)
 - [ ] Zubehör im Auge behalten: USB-Kabel, Touch-Pen, Gehäuse – oft separat oder gar nicht im Bundle
 - [ ] USB-Seriell-Wandler (meist CH340C) → unter Umständen ist ein Treiber nötig
@@ -80,7 +98,7 @@ Unter der Bezeichnung «CYD» werden mehrere, **nicht kompatible** Boards verkau
 
 ### GPIO-Belegung (Originalversion, 1× USB)
 
-Das Board belegt die ESP32-GPIOs **vor** dem ersten eigenen Programmcode fest:
+Das Board belegt die ESP32-GPIOs **vor** dem ersten eigenen Programmcode fest. Die 2-USB-Variante nutzt dieselbe GPIO-Zuordnung (Display, Touch, SD, RGB-LED, LDR, Lautsprecher):
 
 | Funktion | Pins |
 |---|---|
@@ -94,6 +112,18 @@ Das Board belegt die ESP32-GPIOs **vor** dem ersten eigenen Programmcode fest:
 
 *Pinout gemäss Community-Repo [witnessmenow/ESP32-Cheap-Yellow-Display](https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display).*
 
+### Abweichungen der 2-USB-Variante (CYD2USB, wie unserem Board)
+
+| Merkmal | 1× USB (Original) | 2× USB (CYD2USB) |
+|---|---|---|
+| Display-Controller | ILI9341 | **ST7789** |
+| TFT_eSPI-Treiber | ILI9341_2_DRIVER | **ST7789_DRIVER** |
+| Farb-/Inversions-Settings | keine Inversion | **TFT_RGB_ORDER = BGR**, **TFT_INVERSION_ON** |
+| GPIO-Pinout | identisch | identisch |
+| Touch | XPT2046, resistiv | XPT2046, resistiv (identische Pins) |
+
+Wer die ILI9341-Konfiguration auf die 2-USB-Variante flasht, erhält ein Weissbild oder invertierte/verwaschene Farben – umgekehrt genauso. Erst den Treiber anpassen, dann weiter debuggen ([displayengineer.com](https://www.displayengineer.com/compatible/esp32-2432s028r-cyd)).
+
 ### Software-Stack
 
 | Ebene | Werkzeug |
@@ -103,7 +133,11 @@ Das Board belegt die ESP32-GPIOs **vor** dem ersten eigenen Programmcode fest:
 | GUI-Frameworks | LVGL (mit TFT_eSPI-Konfiguration) |
 | Smart Home | ESPHome / Home-Assistant-Dashboards (fertige Community-Projekte) |
 
-**Konfigurations-Hinweis:** TFT_eSPI erfordert eine "User_Setup.h" mit den obigen Pins. Die falsche Konfiguration (z. B. für die 2-USB-Variante) führt zu invertierten Farben oder schwarzem Bild.
+**Konfigurations-Hinweis:** TFT_eSPI erfordert eine "User_Setup.h" mit den obigen Pins und – bei der 2-USB-Variante – dem ST7789-Treiber samt Inversion/BGR (siehe Tabelle oben).
+
+### Zum 4-Pin-Anschlusskabel
+
+Das mitgelieferte 4-farbige Kabel passt in den kleinen 4-Pin-Stecker (1,25 mm Raster) am Platinenrand. Der Hersteller nennt die Schnittstelle «Temperatur-/Feuchtigkeitssensor-Schnittstelle» (gedacht für einen DHT11); die Belegung ist: Rot = 5 V, Gelb = TX, Blau = RX, Schwarz = GND. Damit lässt sich das Board auch ohne USB speisen, extern flashen oder ein Sensor anschliessen ([element14-Guide](https://community.element14.com/technologies/embedded/b/blog/posts/esp32-cheap-yellow-display-cyd-guide-with-a-jellyfish-example), [esp32-chess-Doku](https://github.com/valleyco/esp32-chess/blob/master/docs/boards/esp32-2432s028r/connectors.md)).
 
 ---
 
@@ -113,12 +147,14 @@ Das Board belegt die ESP32-GPIOs **vor** dem ersten eigenen Programmcode fest:
 - [esp32.diy – CYD Complete Build Guide](https://esp32.diy/esp32-cheap-yellow-display/)
 - [cheapyellowdisplay.co.uk – About the CYD](https://cheapyellowdisplay.co.uk/about-cyd)
 - [Proje Defteri – CYD Pinout and Setup Guide](https://projedefteri.com/en/blog/esp32-cheap-yellow-display-cyd-pinout-guide/)
+- [displayengineer.com – ILI9341 vs. ST7789 Revisionen](https://www.displayengineer.com/compatible/esp32-2432s028r-cyd)
+- [ralsina/esposito – CYD2USB Hardware-Guide](https://github.com/ralsina/esposito/blob/main/CYD2USB.md)
 
 ---
 
 ## Projektziele / nächste Schritte
 
-- [ ] Board erhalten, Varianten-Check anhand der eigenen Hardware (USB-Anzahl, Touch-Test)
-- [ ] Entwicklungsumgebung einrichten (MicroPython / Arduino IDE)
-- [ ] Erste Sketche: Display-Test, Touch-Kalibrierung
+- [x] Board erhalten, Varianten-Check anhand der eigenen Hardware → **2-USB-Variante (CYD2USB, ST7789)** festgestellt (05.11.2026)
+- [ ] Entwicklungsumgebung einrichten (MicroPython / Arduino IDE, TFT_eSPI mit ST7789-Settings)
+- [ ] Erste Sketche: Display-Test (Farbtreue mit Inversion/BGR prüfen), Touch-Kalibrierung
 - [ ] Konkrete Projekte: Statusdisplay, Sensor-Dashboard
