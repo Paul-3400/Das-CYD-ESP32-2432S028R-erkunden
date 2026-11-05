@@ -20,6 +20,7 @@ resistiver Touch XPT2046). Beide Tests wurden auf genau diesem Board am
 | [arduino/User_Setup.h](arduino/User_Setup.h) | TFT_eSPI-Konfiguration (Treiber, Pins) – Grundlage für beide Sketches | ✅ getestet |
 | [arduino/CYD_DisplayTest/CYD_DisplayTest.ino](arduino/CYD_DisplayTest/CYD_DisplayTest.ino) | Display-Test: 6 Farbstreifen + Text, blinkende rote LED | ✅ bestanden |
 | [arduino/CYD_TouchTest/CYD_TouchTest.ino](arduino/CYD_TouchTest/CYD_TouchTest.ino) | Touch-Test: Mal-Modus + geführte 4-Punkte-Kalibrierung | ✅ bestanden |
+| [arduino/CYD_Muehle/CYD_Muehle.ino](arduino/CYD_Muehle/CYD_Muehle.ino) | Mühlespiel (Hot-Seat) nach Spielanleitung | ✅ bestanden |
 
 **Reihenfolge:** zuerst die User_Setup.h installieren (Abschnitt 2), dann
 CYD_DisplayTest, dann CYD_TouchTest. Die User_Setup.h ist für beide Sketches
@@ -170,7 +171,53 @@ Konflikt mit dem Display.
 
 ---
 
-## 5. Troubleshooting
+## 5. CYD_Muehle – das Mühlespiel (erstes echtes Projekt)
+
+### Funktion
+
+Komplettes **Mühlespiel (Nine Men's Morris) für zwei Spieler am Gerät**
+(Hot-Seat) nach der Spielanleitung «Anleitung-Mühlespiel.pdf»:
+
+- alle drei Phasen: **Setzen** (je 9 Steine), **Ziehen** (nur freie
+  Nachbarpunkte), **Springen** (ab 3 Steinen auf jedes freie Feld)
+- **16 Mühlen** werden nach jedem Setzen/Ziehen erkannt; die geschlossene
+  Mühle blitzt orange auf
+- **Stein entfernen** nach Mühle mit Turnierregel: Steine in bestehenden
+  Mühlen sind geschützt – ausser es gibt keinen anderen
+- Doppel-Mühle in der Setzphase: trotzdem nur ein Stein
+- alle vier **Endbedingungen**: weniger als 3 Steine, kein legaler Zug,
+  20 Züge ohne Mühle (Remis), dreimal gleiche Stellung (Remis)
+
+### Bedienung
+
+| Aktion | Wirkung |
+|---|---|
+| Statusleiste (oben) | sagt immer, wer dran ist und was zu tun ist |
+| freien Punkt antippen (Setzphase) | Stein setzen |
+| eigenen Stein antippen | auswählen (orange); mögliche Ziele grün markiert |
+| Ziel antippen | ziehen/springen; gleicher Stein nochmal = abwählen |
+| nach Mühle: Gegner-Stein antippen | Stein entfernen |
+| NEU (rechts unten) | neue Partie starten |
+
+Die rechte Spalte zeigt die noch zu setzenden Steine beider Farben; der
+Serial Monitor protokolliert jeden Zug (115200 Baud).
+
+### Bibliotheken und Installation
+
+Genau die gleichen zwei Bibliotheken wie bei CYD_TouchTest (**TFT_eSPI** mit
+der User_Setup.h aus Abschnitt 2 + **XPT2046_Touchscreen**) – nichts Neues zu
+installieren. Sketch-Ordner wie bei den Tests ins Arduino-Verzeichnis kopieren,
+öffnen, hochladen, spielen.
+
+Wer im CYD_TouchTest eigene Kalibrierwerte ermittelt hat, übernimmt die vier
+`#define TS_…`-Zeilen auch in CYD_Muehle (stehen ganz oben im Sketch).
+
+**Bestanden (05.11.2026)** – erste komplette Partie gespielt. Geplante
+Erweiterung: KI-Gegner («CYD spielt Schwarz»).
+
+---
+
+## 6. Troubleshooting
 
 | Symptom | Wahrscheinliche Ursache | Lösung |
 |---|---|---|
@@ -184,10 +231,11 @@ Konflikt mit dem Display.
 
 ---
 
-## 6. Nächste Schritte
+## 7. Nächste Schritte
 
-Mit beiden bestandenen Tests ist die Grundlage komplett. Nun können die
-Projektideen aus der README angegangen werden: Statusdisplay (z. B. für eine
-MeshCore-Station), Sensor-Dashboard (INA226-Werte gross ablesen) oder ein
-Touch-Bedienpanel. Die persönlichen Kalibrierwerte aus CYD_TouchTest gehören in
-jeden künftigen Touch-Sketch kopiert.
+Das erste echte Projekt – das Mühlespiel CYD_Muehle (Abschnitt 5) – ist
+gespielt und bestanden. Weitere Ideen aus der README: Statusdisplay (z. B. für
+eine MeshCore-Station), Sensor-Dashboard (INA226-Werte gross ablesen),
+Touch-Bedienpanel – und als Erweiterung des Spiels der geplante KI-Gegner.
+Die persönlichen Kalibrierwerte aus CYD_TouchTest gehören in jeden künftigen
+Touch-Sketch kopiert.
