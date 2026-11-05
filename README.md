@@ -137,7 +137,36 @@ Wer die ILI9341-Konfiguration auf die 2-USB-Variante flasht, erhält ein Weissbi
 
 ### Zum 4-Pin-Anschlusskabel
 
-Das mitgelieferte 4-farbige Kabel passt in den kleinen 4-Pin-Stecker (1,25 mm Raster) am Platinenrand. Der Hersteller nennt die Schnittstelle «Temperatur-/Feuchtigkeitssensor-Schnittstelle» (gedacht für einen DHT11); die Belegung ist: Rot = 5 V, Gelb = TX, Blau = RX, Schwarz = GND. Damit lässt sich das Board auch ohne USB speisen, extern flashen oder ein Sensor anschliessen ([element14-Guide](https://community.element14.com/technologies/embedded/b/blog/posts/esp32-cheap-yellow-display-cyd-guide-with-a-jellyfish-example), [esp32-chess-Doku](https://github.com/valleyco/esp32-chess/blob/master/docs/boards/esp32-2432s028r/connectors.md)).
+Das mitgelieferte 4-farbige Kabel passt in den kleinen 4-Pin-Stecker (1,25 mm Raster) am Platinenrand. Der Hersteller nennt die Schnittstelle «Temperatur-/Feuchtigkeitssensor-Schnittstelle» (gedacht für einen DHT11); die Belegung laut Schaltplan (P1): Pin 1 = 5 V (rot), Pin 2 = TX (weiss), Pin 3 = RX (grün), Pin 4 = GND (schwarz). Damit lässt sich das Board auch ohne USB speisen, extern flashen oder ein Sensor anschliessen ([element14-Guide](https://community.element14.com/technologies/embedded/b/blog/posts/esp32-cheap-yellow-display-cyd-guide-with-a-jellyfish-example), [esp32-chess-Doku](https://github.com/valleyco/esp32-chess/blob/master/docs/boards/esp32-2432s028r/connectors.md)).
+
+---
+
+## Hersteller-Demo-Paket (Google Drive «CYD_Handbuch»)
+
+Die komplette Hersteller-Ablage (JCZN/Shenzhen Jingcai Intelligent) liegt im Google Drive im Ordner **CYD_Handbuch → 2.8inch_ESP32-2432S028R**:
+
+| Ordner | Inhalt | Nutzen für uns |
+|---|---|---|
+| 1-Demo | Demo_Arduino (30+ Beispiele: TFT_Rainbow, LVGL, WLAN-Server, DHT11, MP3, Buzzer …), Demo_LVGL, libraries (TFT_eSPI, LVGL, LovyanGFX, DHT u. a.) | Beispiel-Code inkl. «TFT_eSPI bottom layer replacement file» mit fertiger User_Setup.h |
+| 2-Specification | Specifications-EN | Datenblatt (beschreibt die ILI9341-Revision) |
+| 3-Structure_Diagram | Dimensions.png | Mechanische Masse |
+| 4-Driver_IC_Data_Sheet | JC2432A028N (LCM, ILI9341V), ESP32-WROOM-32, FM8002A (Audio), 25Q32 (Flash), DHT11 | Chip-Datenblätter |
+| 5-Schematic | MCU-/LCM-Schaltplan, WROOM-Pindefinition | Schaltpläne |
+| 6-User_Manual | Getting started 2.8 Inch.pdf | Arduino-Einstieg (Tutorial zur User_Setup.h) |
+| 7-Character&Picture_Molding_Tool | CH340-Treiber, JPGCompact, WinHex, Serial-Tools | PC-Werkzeuge |
+| 8-Burn operation | LVGL-DEMO2.8R.bin (Werks-Demo), flash_download_tool 3.9.3, Anleitung | Wiederherstellung der Werksfirmware |
+
+### Zentraler Befund: Hersteller-User_Setup.h muss angepasst werden
+
+Die mitgelieferte **User_Setup.h** (TFT_eSPI bottom layer replacement file) konfiguriert **ILI9341_2_DRIVER ohne Inversion** – der Hersteller liefert sie also für die 1-USB-Originalversion aus (konsistent mit Datenblatt und Panel-Spec JC2432A028N von 2022, das ILI9341V nennt). Unsere 2-USB-Variante mit ST7789 braucht folgende Anpassungen in User_Setup.h:
+
+1. "#define ILI9341_2_DRIVER" auskommentieren, stattdessen "**#define ST7789_DRIVER**" aktivieren
+2. "**#define TFT_RGB_ORDER TFT_BGR**" einkommentieren
+3. "**#define TFT_INVERSION_ON**" einkommentieren
+4. Pins unverändert lassen: MISO 12, MOSI 13, SCLK 14, CS 15, DC 2, RST −1, BL 21, TOUCH_CS 33
+5. TFT_WIDTH 240 / TFT_HEIGHT 320 bleiben
+
+Zeigt der Rainbow-Test danach weiterhin falsche Farben, einmal TFT_RGB statt TFT_BGR probieren (bei einzelnen ST7789-Panels abweichend). Danach ist die ganze Demo-Sammlung des Herstellers nutzbar.
 
 ---
 
@@ -149,12 +178,14 @@ Das mitgelieferte 4-farbige Kabel passt in den kleinen 4-Pin-Stecker (1,25 mm Ra
 - [Proje Defteri – CYD Pinout and Setup Guide](https://projedefteri.com/en/blog/esp32-cheap-yellow-display-cyd-pinout-guide/)
 - [displayengineer.com – ILI9341 vs. ST7789 Revisionen](https://www.displayengineer.com/compatible/esp32-2432s028r-cyd)
 - [ralsina/esposito – CYD2USB Hardware-Guide](https://github.com/ralsina/esposito/blob/main/CYD2USB.md)
+- Hersteller-Netdisk (Beipackzettel): [pan.jczn1688.com/1](https://pan.jczn1688.com/1#/) – gespiegelt im eigenen Google Drive «CYD_Handbuch»
 
 ---
 
 ## Projektziele / nächste Schritte
 
 - [x] Board erhalten, Varianten-Check anhand der eigenen Hardware → **2-USB-Variante (CYD2USB, ST7789)** festgestellt (05.11.2026)
-- [ ] Entwicklungsumgebung einrichten (MicroPython / Arduino IDE, TFT_eSPI mit ST7789-Settings)
+- [x] Hersteller-Demo-Paket in Google Drive «CYD_Handbuch» gesichtet; User_Setup.h-Anpassung für ST7789 dokumentiert (05.11.2026)
+- [ ] Entwicklungsumgebung einrichten (Arduino IDE, TFT_eSPI mit ST7789-Settings)
 - [ ] Erste Sketche: Display-Test (Farbtreue mit Inversion/BGR prüfen), Touch-Kalibrierung
 - [ ] Konkrete Projekte: Statusdisplay, Sensor-Dashboard
